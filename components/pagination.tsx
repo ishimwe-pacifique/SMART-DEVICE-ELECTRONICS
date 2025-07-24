@@ -1,175 +1,72 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
-import Link from "next/link"
-import { cn } from "@/lib/utils"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 interface PaginationProps {
   currentPage: number
   totalPages: number
-  baseUrl: string
-  className?: string
+  onPageChange: (page: number) => void
 }
 
-export function Pagination({ currentPage, totalPages, baseUrl, className }: PaginationProps) {
-  // Generate page numbers to display
-  const getPageNumbers = () => {
-    const pages = []
-    const maxPagesToShow = 5
+export function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+  const getVisiblePages = () => {
+    const delta = 2
+    const range = []
+    const rangeWithDots = []
 
-    if (totalPages <= maxPagesToShow) {
-      // If total pages is less than max to show, display all pages
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i)
-      }
+    for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+      range.push(i)
+    }
+
+    if (currentPage - delta > 2) {
+      rangeWithDots.push(1, "...")
     } else {
-      // Always include first page
-      pages.push(1)
-
-      // Calculate start and end of page range
-      let start = Math.max(2, currentPage - 1)
-      let end = Math.min(totalPages - 1, currentPage + 1)
-
-      // Adjust if at the beginning
-      if (currentPage <= 3) {
-        end = Math.min(totalPages - 1, 4)
-      }
-
-      // Adjust if at the end
-      if (currentPage >= totalPages - 2) {
-        start = Math.max(2, totalPages - 3)
-      }
-
-      // Add ellipsis if needed
-      if (start > 2) {
-        pages.push("ellipsis-start")
-      }
-
-      // Add middle pages
-      for (let i = start; i <= end; i++) {
-        pages.push(i)
-      }
-
-      // Add ellipsis if needed
-      if (end < totalPages - 1) {
-        pages.push("ellipsis-end")
-      }
-
-      // Always include last page
-      pages.push(totalPages)
+      rangeWithDots.push(1)
     }
 
-    return pages
-  }
+    rangeWithDots.push(...range)
 
-  const pageNumbers = getPageNumbers()
-
-  // Function to generate page URL
-  const getPageUrl = (page: number) => {
-    try {
-      const url = new URL(baseUrl, window.location.origin)
-      url.searchParams.set("page", page.toString())
-      return url.pathname + url.search
-    } catch {
-      // Fallback for relative URLs
-      if (baseUrl.includes("?")) {
-        if (baseUrl.includes("page=")) {
-          return baseUrl.replace(/page=\d+/, `page=${page}`)
-        } else {
-          return `${baseUrl}&page=${page}`
-        }
-      } else {
-        return `${baseUrl}?page=${page}`
-      }
+    if (currentPage + delta < totalPages - 1) {
+      rangeWithDots.push("...", totalPages)
+    } else {
+      rangeWithDots.push(totalPages)
     }
+
+    return rangeWithDots
   }
+
+  if (totalPages <= 1) return null
 
   return (
-    <div className={cn("flex justify-center items-center gap-1 my-8", className)}>
-      {/* First Page */}
-      <Button
-        variant="outline"
-        size="icon"
-        className="hidden sm:flex"
-        disabled={currentPage === 1}
-        asChild={currentPage !== 1}
-      >
-        {currentPage === 1 ? (
-          <span>
-            <ChevronsLeft className="h-4 w-4" />
-          </span>
-        ) : (
-          <Link href={getPageUrl(1)}>
-            <ChevronsLeft className="h-4 w-4" />
-          </Link>
-        )}
+    <div className="flex items-center justify-center gap-2">
+      <Button variant="outline" size="icon" onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1}>
+        <ChevronLeft className="h-4 w-4" />
       </Button>
 
-      {/* Previous Page */}
-      <Button variant="outline" size="icon" disabled={currentPage === 1} asChild={currentPage !== 1}>
-        {currentPage === 1 ? (
-          <span>
-            <ChevronLeft className="h-4 w-4" />
-          </span>
-        ) : (
-          <Link href={getPageUrl(currentPage - 1)}>
-            <ChevronLeft className="h-4 w-4" />
-          </Link>
-        )}
-      </Button>
-
-      {/* Page Numbers */}
-      {pageNumbers.map((page, index) => {
-        if (page === "ellipsis-start" || page === "ellipsis-end") {
-          return (
-            <Button key={`ellipsis-${index}`} variant="outline" size="icon" disabled className="cursor-default">
-              ...
+      {getVisiblePages().map((page, index) => (
+        <div key={index}>
+          {page === "..." ? (
+            <span className="px-3 py-2">...</span>
+          ) : (
+            <Button
+              variant={currentPage === page ? "default" : "outline"}
+              onClick={() => onPageChange(page as number)}
+              className="min-w-[40px]"
+            >
+              {page}
             </Button>
-          )
-        }
+          )}
+        </div>
+      ))}
 
-        return (
-          <Button
-            key={index}
-            variant={currentPage === page ? "default" : "outline"}
-            size="icon"
-            className={currentPage === page ? "bg-primary hover:bg-primary/90" : ""}
-            asChild={currentPage !== page}
-          >
-            {currentPage === page ? <span>{page}</span> : <Link href={getPageUrl(page as number)}>{page}</Link>}
-          </Button>
-        )
-      })}
-
-      {/* Next Page */}
-      <Button variant="outline" size="icon" disabled={currentPage === totalPages} asChild={currentPage !== totalPages}>
-        {currentPage === totalPages ? (
-          <span>
-            <ChevronRight className="h-4 w-4" />
-          </span>
-        ) : (
-          <Link href={getPageUrl(currentPage + 1)}>
-            <ChevronRight className="h-4 w-4" />
-          </Link>
-        )}
-      </Button>
-
-      {/* Last Page */}
       <Button
         variant="outline"
         size="icon"
-        className="hidden sm:flex"
+        onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        asChild={currentPage !== totalPages}
       >
-        {currentPage === totalPages ? (
-          <span>
-            <ChevronsRight className="h-4 w-4" />
-          </span>
-        ) : (
-          <Link href={getPageUrl(totalPages)}>
-            <ChevronsRight className="h-4 w-4" />
-          </Link>
-        )}
+        <ChevronRight className="h-4 w-4" />
       </Button>
     </div>
   )

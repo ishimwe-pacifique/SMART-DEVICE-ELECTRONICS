@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "Smart Device Electronics - Premium Electronics Store",
   description:
     "Your trusted source for computers, phones, and electronics accessories. Shop the latest technology from top brands.",
-  generator: "v0.dev",
+  generator: "paccy dev",
 }
 
 export default function RootLayout({
@@ -41,7 +41,7 @@ export default function RootLayout({
             </div>
             <Toaster />
             <WhatsAppWidget
-              phoneNumber="0784196351"
+              phoneNumber="+250780612354"
               welcomeMessage="Hello! Need help with electronics? Chat with our product specialists now!"
             />
           </SidebarProvider>

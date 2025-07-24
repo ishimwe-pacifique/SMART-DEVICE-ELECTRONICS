@@ -9,7 +9,7 @@ import Image from "next/image"
 
 // Define your background images - including your brand banner
 const backgroundImages = [
-  "/images/brand-banner.jpg", // Your brand banner
+  "/images/Backlight 200 sur 100.jpg", // Your brand banner
   "/images/product1.jpg",
   "/images/product2.webp",
   "/images/product3.webp",
@@ -27,7 +27,7 @@ export function HeroSection() {
     // Background image rotation every 3 seconds
     const interval = setInterval(() => {
       setCurrentBgIndex((prev) => (prev + 1) % backgroundImages.length)
-    }, 3000)
+    }, 40000)
 
     return () => clearInterval(interval)
   }, [])

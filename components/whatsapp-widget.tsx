@@ -13,7 +13,7 @@ interface WhatsAppWidgetProps {
 }
 
 export function WhatsAppWidget({
-  phoneNumber = "1234567890",
+  phoneNumber = "+250780612354",
   welcomeMessage = "Hello! How can we help you today?",
   position = "bottom-right",
 }: WhatsAppWidgetProps) {

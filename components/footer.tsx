@@ -69,22 +69,22 @@ export function Footer() {
             <h4 className="font-semibold text-lg">Customer Service</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/help" className="text-gray-300 hover:text-primary transition-colors">
+                <Link href="#" className="text-gray-300 hover:text-primary transition-colors">
                   Help Center
                 </Link>
               </li>
               <li>
-                <Link href="/shipping" className="text-gray-300 hover:text-primary transition-colors">
+                <Link href="#" className="text-gray-300 hover:text-primary transition-colors">
                   Shipping Info
                 </Link>
               </li>
               <li>
-                <Link href="/returns" className="text-gray-300 hover:text-primary transition-colors">
+                <Link href="#" className="text-gray-300 hover:text-primary transition-colors">
                   Returns
                 </Link>
               </li>
               <li>
-                <Link href="/warranty" className="text-gray-300 hover:text-primary transition-colors">
+                <Link href="#" className="text-gray-300 hover:text-primary transition-colors">
                   Warranty
                 </Link>
               </li>
@@ -102,15 +102,15 @@ export function Footer() {
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-primary" />
-                <span className="text-gray-300">1-800-SMART-DEV</span>
+                <span className="text-gray-300">+250 780 612 354</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-primary" />
-                <span className="text-gray-300">support@smartdevice.com</span>
+                <span className="text-gray-300">smartzone.nm01@gmail.com</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-primary" />
-                <span className="text-gray-300">123 Tech Street, Digital City</span>
+                <span className="text-gray-300">Room E048, First FloorChic Building, Kigali, Rwanda </span>
               </div>
             </div>
           </div>
@@ -120,13 +120,13 @@ export function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-300 text-sm">© 2024 Smart Device Electronics. All rights reserved.</p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link href="/privacy" className="text-gray-300 hover:text-primary text-sm transition-colors">
+              <Link href="#" className="text-gray-300 hover:text-primary text-sm transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="text-gray-300 hover:text-primary text-sm transition-colors">
+              <Link href="#" className="text-gray-300 hover:text-primary text-sm transition-colors">
                 Terms of Service
               </Link>
-              <Link href="/cookies" className="text-gray-300 hover:text-primary text-sm transition-colors">
+              <Link href="#" className="text-gray-300 hover:text-primary text-sm transition-colors">
                 Cookie Policy
               </Link>
             </div>

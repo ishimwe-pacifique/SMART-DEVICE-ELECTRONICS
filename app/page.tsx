@@ -1,125 +1,50 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Star, ShoppingCart, Heart, ArrowRight, Zap, Shield, Truck, Award } from "lucide-react"
+import {
+  Star,
+  ShoppingCart,
+  Heart,
+  Zap,
+  Shield,
+  Truck,
+  Award,
+  MessageCircle,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useCart } from "@/components/cart-provider"
 import { useToast } from "@/hooks/use-toast"
 import { HeroSection } from "@/components/hero-section"
 import { BrandsSection } from "@/components/brands-section"
+import { getProducts } from "@/app/actions/upload-actions"
+import { ProductQuickView } from "@/components/product-quick-view"
+import { WhatsAppWidget } from "@/components/whatsapp-widget"
 
-const featuredProducts = [
-  {
-    id: 1,
-    name: "iPhone 15 Pro Max",
-    price: 1199.99,
-    originalPrice: 1299.99,
-    rating: 4.9,
-    reviews: 2847,
-    image: "/placeholder.svg?height=300&width=300",
-    brand: "Apple",
-    category: "phones",
-    badge: "Best Seller",
-    specs: ["256GB Storage", "A17 Pro Chip", "Titanium Design"],
-  },
-  {
-    id: 2,
-    name: "MacBook Pro 14-inch M3",
-    price: 1999.99,
-    originalPrice: 2199.99,
-    rating: 4.8,
-    reviews: 1523,
-    image: "/placeholder.svg?height=300&width=300",
-    brand: "Apple",
-    category: "laptops",
-    badge: "New Arrival",
-    specs: ["M3 Chip", "16GB RAM", "512GB SSD"],
-  },
-  {
-    id: 3,
-    name: "Samsung Galaxy S24 Ultra",
-    price: 1099.99,
-    originalPrice: 1199.99,
-    rating: 4.7,
-    reviews: 1876,
-    image: "/placeholder.svg?height=300&width=300",
-    brand: "Samsung",
-    category: "phones",
-    badge: "Hot Deal",
-    specs: ["S Pen Included", "200MP Camera", "5000mAh Battery"],
-  },
-  {
-    id: 4,
-    name: "Dell XPS 13 Plus",
-    price: 1299.99,
-    originalPrice: 1499.99,
-    rating: 4.6,
-    reviews: 892,
-    image: "/placeholder.svg?height=300&width=300",
-    brand: "Dell",
-    category: "laptops",
-    badge: "Editor's Choice",
-    specs: ["Intel i7", "16GB RAM", '13.4" OLED'],
-  },
-]
-
-const categories = [
-  {
-    name: "Smartphones",
-    count: 450,
-    image: "/placeholder.svg?height=200&width=200",
-    icon: "📱",
-    url: "/products?category=phones",
-  },
-  {
-    name: "Laptops",
-    count: 320,
-    image: "/placeholder.svg?height=200&width=200",
-    icon: "💻",
-    url: "/products?category=laptops",
-  },
-  {
-    name: "Tablets",
-    count: 180,
-    image: "/placeholder.svg?height=200&width=200",
-    icon: "📱",
-    url: "/products?category=tablets",
-  },
-  {
-    name: "Headphones",
-    count: 280,
-    image: "/placeholder.svg?height=200&width=200",
-    icon: "🎧",
-    url: "/products?category=headphones",
-  },
-  {
-    name: "Gaming",
-    count: 150,
-    image: "/placeholder.svg?height=200&width=200",
-    icon: "🎮",
-    url: "/products?category=gaming",
-  },
-  {
-    name: "Accessories",
-    count: 520,
-    image: "/placeholder.svg?height=200&width=200",
-    icon: "🔌",
-    url: "/products?category=accessories",
-  },
-]
-
-const brands = [
-  { name: "Apple", logo: "/placeholder.svg?height=60&width=120" },
-  { name: "Samsung", logo: "/placeholder.svg?height=60&width=120" },
-  { name: "Dell", logo: "/placeholder.svg?height=60&width=120" },
-  { name: "HP", logo: "/placeholder.svg?height=60&width=120" },
-  { name: "Lenovo", logo: "/placeholder.svg?height=60&width=120" },
-  { name: "Sony", logo: "/placeholder.svg?height=60&width=120" },
-]
+interface Product {
+  id: string
+  name: string
+  brand: string
+  category: string
+  badge?: string
+  price: number
+  originalPrice?: number
+  rating: number
+  reviews: number
+  description: string
+  specs: string[]
+  images: string[]
+  image: string
+  createdAt: string
+}
 
 const features = [
   {
@@ -146,14 +71,74 @@ const features = [
 
 export default function HomePage() {
   const [isVisible, setIsVisible] = useState(false)
+  const [products, setProducts] = useState<Product[]>([])
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const { addItem } = useCart()
   const { toast } = useToast()
 
   useEffect(() => {
     setIsVisible(true)
+    loadProducts()
   }, [])
 
-  const handleAddToCart = (product: any) => {
+  const loadProducts = async () => {
+    setLoading(true)
+    try {
+      const result = await getProducts()
+      if (result.success) {
+        const allProducts = result.products
+        setProducts(allProducts)
+
+        // Get featured products (first 8 products)
+        setFeaturedProducts(allProducts.slice(0, 8))
+
+        // Generate categories from products
+        const categoryMap = new Map()
+        allProducts.forEach((product: Product) => {
+          const category = product.category
+          if (categoryMap.has(category)) {
+            categoryMap.set(category, categoryMap.get(category) + 1)
+          } else {
+            categoryMap.set(category, 1)
+          }
+        })
+
+        const dynamicCategories = Array.from(categoryMap.entries()).map(([name, count]) => ({
+          name: name.charAt(0).toUpperCase() + name.slice(1),
+          count,
+          icon: getCategoryIcon(name),
+          url: `/products?category=${name}`,
+        }))
+
+        setCategories(dynamicCategories)
+      }
+    } catch (error) {
+      console.error("Error loading products:", error)
+      toast({
+        title: "Error",
+        description: "Failed to load products",
+        variant: "destructive",
+      })
+    }
+    setLoading(false)
+  }
+
+  const getCategoryIcon = (category: string) => {
+    const icons: { [key: string]: string } = {
+      phones: "📱",
+      laptops: "💻",
+      tablets: "📱",
+      headphones: "🎧",
+      gaming: "🎮",
+      accessories: "🔌",
+    }
+    return icons[category] || "📦"
+  }
+
+  const handleAddToCart = (product: Product) => {
     addItem({
       id: product.id,
       name: product.name,
@@ -168,11 +153,18 @@ export default function HomePage() {
     })
   }
 
+  const handleWhatsAppContact = (product: Product) => {
+    const message = `Hi! I'm interested in ${product.name} - $${product.price}. Can you provide more details?`
+    const phoneNumber = "+250780612354" // Replace with your WhatsApp number
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
+    window.open(whatsappUrl, "_blank")
+  }
+
   return (
     <div className="space-y-12">
       {/* Hero Section */}
-    
-       <HeroSection />
+      <HeroSection />
+
       {/* Features Section */}
       <section className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -201,22 +193,36 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {categories.map((category, index) => (
-            <Link key={category.name} href={category.url}>
-              <Card
-                className={`hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:scale-105 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
-                style={{ transitionDelay: `${index * 100}ms` }}
-              >
+        {loading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {[...Array(6)].map((_, index) => (
+              <Card key={index} className="animate-pulse">
                 <CardContent className="p-6 text-center">
-                  <div className="text-4xl mb-3">{category.icon}</div>
-                  <h3 className="font-semibold mb-1">{category.name}</h3>
-                  <p className="text-sm text-gray-600">{category.count} items</p>
+                  <div className="w-12 h-12 bg-gray-200 rounded mx-auto mb-3"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-1"></div>
+                  <div className="h-3 bg-gray-200 rounded w-16 mx-auto"></div>
                 </CardContent>
               </Card>
-            </Link>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {categories.map((category, index) => (
+              <Link key={category.name} href={category.url}>
+                <Card
+                  className={`hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:scale-105 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
+                  style={{ transitionDelay: `${index * 100}ms` }}
+                >
+                  <CardContent className="p-6 text-center">
+                    <div className="text-4xl mb-3">{category.icon}</div>
+                    <h3 className="font-semibold mb-1">{category.name}</h3>
+                    <p className="text-sm text-gray-600">{category.count} items</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Featured Products */}
@@ -231,80 +237,39 @@ export default function HomePage() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredProducts.map((product, index) => (
-            <Card
-              key={product.id}
-              className={`group hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
-              style={{ transitionDelay: `${index * 150}ms` }}
-            >
-              <CardHeader className="p-0">
-                <div className="relative overflow-hidden">
-                  <Image
-                    src={product.image || "/placeholder.svg"}
-                    alt={product.name}
-                    width={300}
-                    height={300}
-                    className="w-full h-48 object-cover rounded-t-lg transition-transform duration-300 group-hover:scale-110"
-                  />
-                  <Badge className="absolute top-2 left-2 bg-primary">{product.badge}</Badge>
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Heart className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="mb-2">
-                  <Badge variant="outline" className="text-xs">
-                    {product.brand}
-                  </Badge>
-                </div>
-                <CardTitle className="text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                  {product.name}
-                </CardTitle>
-                <div className="flex items-center gap-1 mb-2">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${i < Math.floor(product.rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-gray-600">({product.reviews})</span>
-                </div>
-                <div className="space-y-2 mb-3">
-                  {product.specs.map((spec, i) => (
-                    <div key={i} className="text-xs text-gray-600">
-                      • {spec}
-                    </div>
-                  ))}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xl font-bold text-primary">${product.price}</span>
-                  <span className="text-sm text-gray-500 line-through">${product.originalPrice}</span>
-                </div>
-              </CardContent>
-              <CardFooter className="p-4 pt-0 space-y-2">
-                <Button className="w-full bg-primary hover:bg-primary/90" onClick={() => handleAddToCart(product)}>
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Add to Cart
-                </Button>
-                <Button variant="outline" className="w-full" asChild>
-                  <Link href={`/products/${product.id}`}>View Details</Link>
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, index) => (
+              <Card key={index} className="animate-pulse">
+                <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+                <CardContent className="p-4">
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-4"></div>
+                  <div className="h-8 bg-gray-200 rounded"></div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredProducts.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                index={index}
+                isVisible={isVisible}
+                onAddToCart={handleAddToCart}
+                onWhatsAppContact={handleWhatsAppContact}
+                onQuickView={setSelectedProduct}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Brands Section */}
-     <BrandsSection />
+      <BrandsSection />
 
       {/* Newsletter Section */}
       <section className="bg-primary text-white">
@@ -332,6 +297,194 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Product Quick View Modal */}
+      {selectedProduct && (
+        <ProductQuickView
+          product={selectedProduct}
+          isOpen={!!selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          onAddToCart={handleAddToCart}
+          onWhatsAppContact={handleWhatsAppContact}
+        />
+      )}
+
+      {/* WhatsApp Widget */}
+      <WhatsAppWidget />
     </div>
+  )
+}
+
+// Enhanced Product Card Component
+interface ProductCardProps {
+  product: Product
+  index: number
+  isVisible: boolean
+  onAddToCart: (product: Product) => void
+  onWhatsAppContact: (product: Product) => void
+  onQuickView: (product: Product) => void
+}
+
+function ProductCard({ product, index, isVisible, onAddToCart, onWhatsAppContact, onQuickView }: ProductCardProps) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [isHovered, setIsHovered] = useState(false)
+
+  const nextImage = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setCurrentImageIndex((prev) => (prev + 1) % product.images.length)
+  }
+
+  const prevImage = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setCurrentImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length)
+  }
+
+  return (
+    <Card
+      className={`group hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
+      style={{ transitionDelay: `${index * 150}ms` }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <CardHeader className="p-0">
+        <div className="relative overflow-hidden group">
+          <Image
+            src={product.images[currentImageIndex] || product.image || "/placeholder.svg"}
+            alt={product.name}
+            width={300}
+            height={300}
+            className="w-full h-48 object-cover rounded-t-lg transition-transform duration-300 group-hover:scale-110"
+          />
+          {product.badge && <Badge className="absolute top-2 left-2 bg-primary">{product.badge}</Badge>}
+
+          {/* Image Navigation */}
+          {product.images.length > 1 && isHovered && (
+            <>
+              <Button
+                size="icon"
+                variant="secondary"
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 h-8 w-8 opacity-80 hover:opacity-100"
+                onClick={prevImage}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="secondary"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 opacity-80 hover:opacity-100"
+                onClick={nextImage}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+
+          {/* Action Buttons */}
+          <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              size="icon"
+              variant="secondary"
+              className="h-8 w-8"
+              onClick={(e) => {
+                e.stopPropagation()
+                onQuickView(product)
+              }}
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+            <Button size="icon" variant="secondary" className="h-8 w-8">
+              <Heart className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Image Indicators */}
+          {product.images.length > 1 && (
+            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1">
+              {product.images.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`w-2 h-2 rounded-full ${idx === currentImageIndex ? "bg-white" : "bg-white/50"}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </CardHeader>
+
+      <CardContent className="p-4">
+        <div className="mb-2">
+          <Badge variant="outline" className="text-xs">
+            {product.brand}
+          </Badge>
+        </div>
+        <CardTitle className="text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+          {product.name}
+        </CardTitle>
+        <div className="flex items-center gap-1 mb-2">
+          <div className="flex">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                className={`h-4 w-4 ${i < Math.floor(product.rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+              />
+            ))}
+          </div>
+          <span className="text-sm text-gray-600">({product.reviews})</span>
+        </div>
+
+        {/* Specs Preview */}
+        <div className="space-y-1 mb-3">
+          {product.specs.slice(0, 2).map((spec, i) => (
+            <div key={i} className="text-xs text-gray-600">
+              • {spec}
+            </div>
+          ))}
+          {product.specs.length > 2 && (
+            <div className="text-xs text-gray-500">+{product.specs.length - 2} more features</div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xl font-bold text-primary">RWF{product.price}</span>
+          {product.originalPrice && (
+            <span className="text-sm text-gray-500 line-through">RWF{product.originalPrice}</span>
+          )}
+          {product.originalPrice && (
+            <Badge variant="destructive" className="text-xs">
+              Save ${(product.originalPrice - product.price).toFixed(2)}
+            </Badge>
+          )}
+        </div>
+      </CardContent>
+
+      <CardFooter className="p-4 pt-0 space-y-2">
+        <div className="flex gap-2 w-full">
+          <Button
+            className="flex-1 bg-primary hover:bg-primary/90"
+            onClick={(e) => {
+              e.stopPropagation()
+              onAddToCart(product)
+            }}
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Add to Cart
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="text-green-600 hover:text-green-700 hover:bg-green-50"
+            onClick={(e) => {
+              e.stopPropagation()
+              onWhatsAppContact(product)
+            }}
+          >
+            <MessageCircle className="h-4 w-4" />
+          </Button>
+        </div>
+        <Button variant="outline" className="w-full" asChild>
+          <Link href={`/products/${product.id}`}>View Details</Link>
+        </Button>
+      </CardFooter>
+    </Card>
   )
 }

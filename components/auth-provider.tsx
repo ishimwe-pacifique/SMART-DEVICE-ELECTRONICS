@@ -1,115 +1,149 @@
 "use client"
 
 import type React from "react"
+import { createContext, useContext, useReducer, useEffect } from "react"
 
-import { createContext, useContext, useEffect, useState } from "react"
-
-interface User {
+interface CartItem {
   id: string
-  email: string
-  firstName?: string
-  lastName?: string
-  isAdmin?: boolean
+  name: string
+  price: number
+  image: string
+  brand: string
+  category: string
+  quantity: number
 }
 
-interface AuthContextType {
-  user: User | null
-  login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string) => Promise<void>
-  logout: () => void
-  isLoading: boolean
+interface CartState {
+  items: CartItem[]
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+type CartAction =
+  | { type: "ADD_ITEM"; payload: Omit<CartItem, "quantity"> }
+  | { type: "REMOVE_ITEM"; payload: string }
+  | { type: "UPDATE_QUANTITY"; payload: { id: string; quantity: number } }
+  | { type: "CLEAR_CART" }
+  | { type: "LOAD_CART"; payload: CartItem[] }
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+const CartContext = createContext<{
+  items: CartItem[]
+  addItem: (item: Omit<CartItem, "quantity">) => void
+  removeItem: (id: string) => void
+  updateQuantity: (id: string, quantity: number) => void
+  clearCart: () => void
+  getTotalPrice: () => number
+  getTotalItems: () => number
+} | null>(null)
 
-  useEffect(() => {
-    // Check for existing token and validate
-    const token = localStorage.getItem("access_token")
-    if (token) {
-      // In a real app, validate token with backend
-      setUser({
-        id: "1",
-        email: "user@example.com",
-        firstName: "John",
-        lastName: "Doe",
-      })
+function cartReducer(state: CartState, action: CartAction): CartState {
+  switch (action.type) {
+    case "ADD_ITEM": {
+      const existingItem = state.items.find((item) => item.id === action.payload.id)
+      if (existingItem) {
+        return {
+          ...state,
+          items: state.items.map((item) =>
+            item.id === action.payload.id ? { ...item, quantity: item.quantity + 1 } : item,
+          ),
+        }
+      }
+      return {
+        ...state,
+        items: [...state.items, { ...action.payload, quantity: 1 }],
+      }
     }
-    setIsLoading(false)
+    case "REMOVE_ITEM":
+      return {
+        ...state,
+        items: state.items.filter((item) => item.id !== action.payload),
+      }
+    case "UPDATE_QUANTITY":
+      if (action.payload.quantity <= 0) {
+        return {
+          ...state,
+          items: state.items.filter((item) => item.id !== action.payload.id),
+        }
+      }
+      return {
+        ...state,
+        items: state.items.map((item) =>
+          item.id === action.payload.id ? { ...item, quantity: action.payload.quantity } : item,
+        ),
+      }
+    case "CLEAR_CART":
+      return { items: [] }
+    case "LOAD_CART":
+      return { items: action.payload }
+    default:
+      return state
+  }
+}
+
+export function CartProvider({ children }: { children: React.ReactNode }) {
+  const [state, dispatch] = useReducer(cartReducer, { items: [] })
+
+  // Load cart from localStorage on mount
+  useEffect(() => {
+    const savedCart = localStorage.getItem("cart")
+    if (savedCart) {
+      try {
+        const cartItems = JSON.parse(savedCart)
+        dispatch({ type: "LOAD_CART", payload: cartItems })
+      } catch (error) {
+        console.error("Failed to load cart from localStorage:", error)
+      }
+    }
   }, [])
 
-  const login = async (email: string, password: string) => {
-    setIsLoading(true)
-    try {
-      // Mock API call - replace with actual API
-      const response = await fetch("/api/auth/login/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      })
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(state.items))
+  }, [state.items])
 
-      if (response.ok) {
-        const data = await response.json()
-        localStorage.setItem("access_token", data.access)
-        localStorage.setItem("refresh_token", data.refresh)
-        setUser({
-          id: "1",
-          email,
-          firstName: "John",
-          lastName: "Doe",
-        })
-      }
-    } catch (error) {
-      console.error("Login failed:", error)
-    } finally {
-      setIsLoading(false)
-    }
+  const addItem = (item: Omit<CartItem, "quantity">) => {
+    dispatch({ type: "ADD_ITEM", payload: item })
   }
 
-  const register = async (email: string, password: string) => {
-    setIsLoading(true)
-    try {
-      // Mock API call - replace with actual API
-      const response = await fetch("/api/auth/register/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        localStorage.setItem("access_token", data.access)
-        localStorage.setItem("refresh_token", data.refresh)
-        setUser({
-          id: "1",
-          email,
-          firstName: "John",
-          lastName: "Doe",
-        })
-      }
-    } catch (error) {
-      console.error("Registration failed:", error)
-    } finally {
-      setIsLoading(false)
-    }
+  const removeItem = (id: string) => {
+    dispatch({ type: "REMOVE_ITEM", payload: id })
   }
 
-  const logout = () => {
-    localStorage.removeItem("access_token")
-    localStorage.removeItem("refresh_token")
-    setUser(null)
+  const updateQuantity = (id: string, quantity: number) => {
+    dispatch({ type: "UPDATE_QUANTITY", payload: { id, quantity } })
   }
 
-  return <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>{children}</AuthContext.Provider>
+  const clearCart = () => {
+    dispatch({ type: "CLEAR_CART" })
+  }
+
+  const getTotalPrice = () => {
+    return state.items.reduce((total, item) => total + item.price * item.quantity, 0)
+  }
+
+  const getTotalItems = () => {
+    return state.items.reduce((total, item) => total + item.quantity, 0)
+  }
+
+  return (
+    <CartContext.Provider
+      value={{
+        items: state.items,
+        addItem,
+        removeItem,
+        updateQuantity,
+        clearCart,
+        getTotalPrice,
+        getTotalItems,
+      }}
+    >
+      {children}
+    </CartContext.Provider>
+  )
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider")
+export function useCart() {
+  const context = useContext(CartContext)
+  if (!context) {
+    throw new Error("useCart must be used within a CartProvider")
   }
   return context
 }

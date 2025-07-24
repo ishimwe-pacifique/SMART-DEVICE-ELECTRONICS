@@ -66,13 +66,13 @@ const brands = [
   { name: "Google", url: "/products?brand=google" },
 ]
 
-const accountItems = [
-  { title: "My Account", url: "/account", icon: User },
-  { title: "Wishlist", url: "/wishlist", icon: Heart },
-  { title: "Orders", url: "/orders", icon: ShoppingCart },
-  { title: "Settings", url: "/settings", icon: Settings },
-  { title: "Help", url: "/help", icon: HelpCircle },
-]
+// const accountItems = [
+//   { title: "My Account", url: "/account", icon: User },
+//   { title: "Wishlist", url: "/wishlist", icon: Heart },
+//   { title: "Orders", url: "/orders", icon: ShoppingCart },
+//   { title: "Settings", url: "/settings", icon: Settings },
+//   { title: "Help", url: "/help", icon: HelpCircle },
+// ]
 
 export function AppSidebar() {
   const pathname = usePathname()
@@ -141,10 +141,10 @@ export function AppSidebar() {
         <SidebarSeparator />
 
         <SidebarGroup>
-          <SidebarGroupLabel>Account</SidebarGroupLabel>
+          {/* <SidebarGroupLabel>Account</SidebarGroupLabel> */}
           <SidebarGroupContent>
             <SidebarMenu>
-              {accountItems.map((item) => (
+              {/* {accountItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={pathname === item.url}>
                     <Link href={item.url} onClick={handleLinkClick}>
@@ -153,7 +153,7 @@ export function AppSidebar() {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+              ))} */}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
