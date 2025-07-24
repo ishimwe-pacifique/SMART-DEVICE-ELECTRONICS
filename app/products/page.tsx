@@ -260,7 +260,7 @@ export default function ProductsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Filters Sidebar */}
+      
         <div
           className={`lg:w-64 space-y-6 ${
             showFilters
@@ -291,7 +291,7 @@ export default function ProductsPage() {
               />
             </div>
 
-            {/* Price Range */}
+       
             <div className="space-y-2">
               <Label>Price Range</Label>
               <div className="px-2">
@@ -312,7 +312,7 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {/* Categories */}
+          
             {categories.length > 0 && (
               <div className="space-y-2">
                 <Label>Categories</Label>
@@ -333,7 +333,6 @@ export default function ProductsPage() {
               </div>
             )}
 
-            {/* Brands */}
             {brands.length > 0 && (
               <div className="space-y-2">
                 <Label>Brands</Label>
@@ -354,16 +353,15 @@ export default function ProductsPage() {
               </div>
             )}
 
-            {/* Clear Filters */}
+         
             <Button variant="outline" className="w-full" onClick={clearFilters}>
               Clear All Filters
             </Button>
           </div>
         </div>
 
-        {/* Products Grid */}
+      
         <div className="flex-1">
-          {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div>
               <h1 className="text-2xl font-bold mb-1">Products</h1>
@@ -396,7 +394,7 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          {/* Active Filters */}
+          
           {(selectedCategories.length > 0 ||
             selectedBrands.length > 0 ||
             searchTerm ||
@@ -461,7 +459,6 @@ export default function ProductsPage() {
             </div>
           )}
 
-          {/* Products Grid */}
           {currentProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {currentProducts.map((product) => (
@@ -563,7 +560,7 @@ export default function ProductsPage() {
             </div>
           )}
 
-          {/* Pagination */}
+          
           {filteredProducts.length > 0 && totalPages > 1 && (
             <div className="mt-8">
               <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
@@ -572,7 +569,7 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      {/* Product Quick View Modal */}
+     
       {selectedProduct && (
         <ProductQuickView
           product={selectedProduct}
@@ -586,12 +583,11 @@ export default function ProductsPage() {
   )
 }
 
-// Loading Skeleton Component
+
 function ProductsPageSkeleton() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar skeleton */}
         <div className="lg:w-64 space-y-6 hidden lg:block">
           <div className="space-y-4">
             <div className="h-4 bg-gray-200 rounded w-20"></div>
@@ -611,7 +607,7 @@ function ProductsPageSkeleton() {
           </div>
         </div>
 
-        {/* Products grid skeleton */}
+       
         <div className="flex-1">
           <div className="flex justify-between items-center mb-6">
             <div>

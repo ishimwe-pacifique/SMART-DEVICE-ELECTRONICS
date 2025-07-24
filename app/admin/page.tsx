@@ -7,7 +7,7 @@ import Image from "next/image"
 import { getProducts } from "@/app/actions/upload-actions"
 
 export default async function AdminPage() {
-  const result = await getProducts(8) // Get latest 8 products
+  const result = await getProducts(8) 
   const products = result.success ? result.products : []
 
   return (
@@ -17,7 +17,7 @@ export default async function AdminPage() {
         <p className="text-gray-600">Manage your product catalog</p>
       </div>
 
-      {/* Quick Actions */}
+      
       <div className="grid md:grid-cols-3 gap-6 mb-8">
         <Card>
           <CardContent className="p-6 text-center">
@@ -59,7 +59,7 @@ export default async function AdminPage() {
         </Card>
       </div>
 
-      {/* Recent Products */}
+    
       <Card>
         <CardHeader>
           <CardTitle>Recent Products</CardTitle>

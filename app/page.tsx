@@ -268,10 +268,10 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Brands Section */}
+ 
       <BrandsSection />
 
-      {/* Newsletter Section */}
+    
       <section className="bg-primary text-white">
         <div className="container mx-auto px-4 py-16">
           <div className="grid md:grid-cols-2 gap-8 items-center">
@@ -298,7 +298,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Product Quick View Modal */}
+      
       {selectedProduct && (
         <ProductQuickView
           product={selectedProduct}

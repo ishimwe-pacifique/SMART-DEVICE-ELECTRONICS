@@ -161,19 +161,19 @@ export default function EditProductPage() {
     setIsUpdating(true)
 
     try {
-      // Add new images to form data
+  
       selectedImages.forEach((file, index) => {
         formData.append(`new_image_${index}`, file)
       })
 
-      // Add existing images to form data
+     
       formData.append("existing_images", JSON.stringify(existingImages))
 
-      // Add specs to form data
+      
       const validSpecs = specs.filter((spec) => spec.trim() !== "")
       formData.append("specs", JSON.stringify(validSpecs))
 
-      // Add product ID
+    
       formData.append("id", productId)
 
       const result = await updateProduct(formData)
@@ -244,11 +244,11 @@ export default function EditProductPage() {
         </CardHeader>
         <CardContent>
           <form action={handleSubmit} className="space-y-6">
-            {/* Product Images */}
+          
             <div className="space-y-4">
               <Label className="text-base font-semibold">Product Images (Max 5)</Label>
 
-              {/* Existing Images */}
+            
               {existingImages.length > 0 && (
                 <div>
                   <Label className="text-sm text-gray-600 mb-2 block">Current Images</Label>
@@ -278,7 +278,7 @@ export default function EditProductPage() {
                 </div>
               )}
 
-              {/* New Images Upload */}
+            
               {existingImages.length + selectedImages.length < 5 && (
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                   <input
@@ -296,7 +296,6 @@ export default function EditProductPage() {
                 </div>
               )}
 
-              {/* New Image Previews */}
               {previewUrls.length > 0 && (
                 <div>
                   <Label className="text-sm text-gray-600 mb-2 block">New Images</Label>
@@ -327,7 +326,6 @@ export default function EditProductPage() {
               )}
             </div>
 
-            {/* Product Details */}
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
